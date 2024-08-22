@@ -15,18 +15,19 @@ const Signup = () => {
   }, []);
 
   return (
-    <div className="flex items-center justify-center h-screen border border-black">
-      <div className="border border-black w-[80%] h-[35rem] lg:w-[30rem] lg:h-[42rem]">
-        <Heading text="Signup" />
-        <SubHeading text="Enter your information to create an account" />
-        <InputBox ref={inputRef} heading="Name" placeholder="John" />
-        <InputBox heading="Email" placeholder="Email..." />
-        <InputBox heading="Password" placeholder="Password.." />
-        <InputBox heading="Phone Number" placeholder="+91..." />
-        <SubmitBtn text="Submit" />
-        <BottomWarning text1="Already have an account?" text2="Sign in" link="signin" />
-      </div>
-    </div>
+<div className="flex bg-cyan-100 items-center justify-center min-h-screen p-4 border border-black">
+  <div className="border bg-white rounded-lg border-black w-full max-w-lg h-auto p-6 lg:p-8">
+    <Heading text="Signup" />
+    <SubHeading text="Enter your information to create an account" />
+    <InputBox ref={inputRef} heading="Name" placeholder="John" />
+    <InputBox heading="Email" placeholder="Email..." />
+    <InputBox heading="Password" placeholder="Password.." />
+    <InputBox heading="Phone Number" placeholder="+91..." />
+    <SubmitBtn text="Submit" />
+    <BottomWarning text1="Already have an account?" text2="Sign in" link="signin" />
+  </div>
+</div>
+
   );
 };
 

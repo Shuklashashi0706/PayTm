@@ -8,14 +8,14 @@ export interface PropsSchema {
 const InputBox = forwardRef<HTMLInputElement, PropsSchema>((props, ref) => {
   const { heading, placeholder } = props;
   return (
-    <div className="h-[15%] w-full flex justify-center items-center">
-      <div className="w-[90%] h-full flex flex-col justify-center">
-        <div className="text-black font-semibold lg:text-[1.5rem] lg:mb-1">
+    <div className="h-auto w-full flex justify-center items-center py-2">
+      <div className="w-[95%] h-full flex flex-col justify-center">
+        <div className="text-black font-semibold text-base sm:text-lg lg:text-xl lg:mb-1">
           {heading}
         </div>
         <input
           type="text"
-          className="border border-gray-500 rounded-md px-2 w-full h-[40%] text-gray-500"
+          className="border border-gray-500 rounded-md px-2 w-full h-10 sm:h-12 text-gray-600"
           placeholder={placeholder}
           ref={ref}
         />

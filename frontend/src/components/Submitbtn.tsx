@@ -1,13 +1,16 @@
 export interface propsSchema {
   text: string;
 }
+
 const SubmitBtn = (props: propsSchema) => {
   const { text } = props;
   return (
-    <div className=" h-[9%] w-full flex justify-center items-center ">
-      <div className=" bg-black w-[80%] h-[80%] rounded-lg flex items-center justify-center cursor-pointer hover:scale-105">
-        <div className=" font-bold text-1xl lg:text-2xl text-white ">{text}</div>
-      </div>
+    <div className="h-[8%] w-full flex justify-center items-center py-2">
+      <button className="bg-black w-[90%] sm:w-[80%] h-12 sm:h-14 rounded-lg flex items-center justify-center cursor-pointer transition-transform duration-300">
+        <span className="font-bold text-lg sm:text-xl lg:text-2xl text-white">
+          {text}
+        </span>
+      </button>
     </div>
   );
 };
