@@ -16,7 +16,10 @@ dbConnection();
 //middleware
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors());
+app.use(cors({
+  origin:'http://localhost:3000', // Replace with your frontend origin
+  credentials: true, // This allows the cookie to be sent
+}));
 
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/account",accountRouter)

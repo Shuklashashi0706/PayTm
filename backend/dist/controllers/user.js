@@ -21,11 +21,11 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { name, email, password, phoneNum } = req.body;
         if (!name || !email || !password || !phoneNum) {
-            res.status(400).send({ message: "All fields are required" });
+            return res.status(400).send({ message: "All fields are required" });
         }
         const foundUser = yield userModal_1.default.findOne({ email: email });
         if (foundUser) {
-            return res.status(403).send({ message: "User already registered" });
+            return res.status(400).send({ message: "User already registered" });
         }
         let salt = 10;
         const hashedPassword = bcrypt_1.default.hashSync(password, salt);
@@ -43,7 +43,7 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         yield bankModal_1.default.create(balance);
         return res
             .status(200)
-            .cookie("token", (0, generateToken_1.default)().generateToken(user))
+            .cookie("token", (0, generateToken_1.default)().generateToken(user), { httpOnly: true })
             .send({ message: "User registered successfully" });
     }
     catch (error) {
@@ -63,14 +63,44 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             name: user === null || user === void 0 ? void 0 : user.name,
             email: user === null || user === void 0 ? void 0 : user.email,
         };
+        const aggregate = [
+            {
+                $match: {
+                    email: `${emails}`,
+                },
+            },
+            {
+                $lookup: {
+                    from: "accounts",
+                    localField: "_id",
+                    foreignField: "userId",
+                    as: "result",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$result",
+                },
+            },
+            {
+                $project: {
+                    _id: 1,
+                    name: 1,
+                    email: 1,
+                    phone: 1,
+                    balance: "$result.balance",
+                },
+            },
+        ];
+        const userRes = yield userModal_1.default.aggregate(aggregate);
         if (user) {
             const password = user.password;
             const isSame = bcrypt_1.default.compareSync(passwords, password);
             if (isSame) {
                 res
                     .status(200)
-                    .cookie("token", (0, generateToken_1.default)().generateToken(users))
-                    .send({ message: "User login successfully" });
+                    .cookie("token", (0, generateToken_1.default)().generateToken(users), { httpOnly: true })
+                    .send({ message: "User login successfully", userRes });
             }
             else {
                 res.status(400).send({ message: "User not login successfully" });

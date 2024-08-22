@@ -38,16 +38,16 @@ export const getBalance = async (req: Request, res: Response) => {
 
 export const transferBalance = async (req: Request, res: Response) => {
   try {
-    const senderId: string | undefined = req.query.id as string | undefined;
-    const { recieverId, amount }: { recieverId: string; amount: number } =
-      req.body;
-
+    
+    const recieverId: string | undefined = req.query.id as string | undefined;
+    const { senderId, amount }: { senderId: string; amount: number } = req.body;
+    console.log("Sender",senderId,"Reciever",recieverId);
+    
     if (!senderId || !recieverId || !amount) {
       return res.status(400).json({
         message: "Missing senderId, recieverId, or amount",
       });
     }
-
     if (
       !mongoose.Types.ObjectId.isValid(senderId) ||
       !mongoose.Types.ObjectId.isValid(recieverId)

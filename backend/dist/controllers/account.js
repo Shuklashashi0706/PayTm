@@ -49,61 +49,67 @@ const getBalance = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 });
 exports.getBalance = getBalance;
 const transferBalance = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const senderId = req.query.id;
-    const { recieverId, amount } = req.body;
-    if (!senderId || !recieverId || !amount) {
-        return res.status(400).json({
-            message: "Missing senderId, recieverId, or amount",
-        });
-    }
-    if (!mongoose_1.default.Types.ObjectId.isValid(senderId) ||
-        !mongoose_1.default.Types.ObjectId.isValid(recieverId)) {
-        return res.status(400).json({
-            message: "Invalid senderId or recieverId",
-        });
-    }
-    const session = yield mongoose_1.default.startSession();
     try {
-        session.startTransaction();
-        const account = yield bankModal_1.default
-            .findOne({ userId: new mongoose_1.default.Types.ObjectId(senderId) })
-            .session(session);
-        if (!account || account.balance < amount) {
-            yield session.abortTransaction();
+        const recieverId = req.query.id;
+        const { senderId, amount } = req.body;
+        console.log("Sender", senderId, "Reciever", recieverId);
+        if (!senderId || !recieverId || !amount) {
             return res.status(400).json({
-                message: "Insufficient balance",
+                message: "Missing senderId, recieverId, or amount",
             });
         }
-        const toAccount = yield bankModal_1.default
-            .findOne({ userId: new mongoose_1.default.Types.ObjectId(recieverId) })
-            .session(session);
-        if (!toAccount) {
-            yield session.abortTransaction();
+        if (!mongoose_1.default.Types.ObjectId.isValid(senderId) ||
+            !mongoose_1.default.Types.ObjectId.isValid(recieverId)) {
             return res.status(400).json({
-                message: "Invalid account",
+                message: "Invalid senderId or recieverId",
             });
         }
-        // Perform the transfer
-        yield bankModal_1.default
-            .updateOne({ userId: new mongoose_1.default.Types.ObjectId(senderId) }, { $inc: { balance: -amount } })
-            .session(session);
-        yield bankModal_1.default
-            .updateOne({ userId: new mongoose_1.default.Types.ObjectId(recieverId) }, { $inc: { balance: amount } })
-            .session(session);
-        // Commit the transaction
-        yield session.commitTransaction();
-        session.endSession();
-        res.json({
-            message: "Transfer successful",
-        });
+        const session = yield mongoose_1.default.startSession();
+        try {
+            session.startTransaction();
+            const account = yield bankModal_1.default
+                .findOne({ userId: new mongoose_1.default.Types.ObjectId(senderId) })
+                .session(session);
+            if (!account || account.balance < amount) {
+                yield session.abortTransaction();
+                return res.status(400).json({
+                    message: "Insufficient balance",
+                });
+            }
+            const toAccount = yield bankModal_1.default
+                .findOne({ userId: new mongoose_1.default.Types.ObjectId(recieverId) })
+                .session(session);
+            if (!toAccount) {
+                yield session.abortTransaction();
+                return res.status(400).json({
+                    message: "Invalid account",
+                });
+            }
+            // Perform the transfer
+            yield bankModal_1.default
+                .updateOne({ userId: new mongoose_1.default.Types.ObjectId(senderId) }, { $inc: { balance: -amount } })
+                .session(session);
+            yield bankModal_1.default
+                .updateOne({ userId: new mongoose_1.default.Types.ObjectId(recieverId) }, { $inc: { balance: amount } })
+                .session(session);
+            // Commit the transaction
+            yield session.commitTransaction();
+            session.endSession();
+            res.json({
+                message: "Transfer successful",
+            });
+        }
+        catch (error) {
+            console.error("Error", error);
+            yield session.abortTransaction();
+            session.endSession();
+            res
+                .status(ResponseStatus.server_fail)
+                .json({ message: "Error occurred during the transaction" });
+        }
     }
     catch (error) {
-        console.error("Error", error);
-        yield session.abortTransaction();
-        session.endSession();
-        res
-            .status(ResponseStatus.server_fail)
-            .json({ message: "Error occurred during the transaction" });
+        console.error(error);
     }
 });
 exports.transferBalance = transferBalance;

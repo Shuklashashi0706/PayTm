@@ -1,5 +1,5 @@
 interface propSchema {
-  value: string;
+  value: number;
 }
 const Balance = (prop: propSchema) => {
   const { value } = prop;

@@ -19,11 +19,11 @@ const jwtToken = () => {
                     next();
                 }
                 else {
-                    res.status(400).send({ message: "User not verified" });
+                    return res.status(400).json({ message: "User not verified" });
                 }
             }
             else {
-                res.status(400).send({ message: "User not verified" });
+                return res.status(400).json({ message: "User not verified" });
             }
         },
     };

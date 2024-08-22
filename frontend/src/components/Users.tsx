@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 type User = {
   name: string;
@@ -7,18 +8,22 @@ type User = {
 };
 
 const Users = () => {
-  // Replace with backend call
-  const [users] = useState<User[]>([
-    {
-      name: "Hariom",
-      _id: 1,
-    },
-    {
-      name: "Hari",
-      _id: 2,
-    },
-  ]);
+  const [users, setUsers] = useState<any[]>([]);
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/v1/user/getAllUsers",
+          { withCredentials: true }
+        );
+        setUsers(response.data.users);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
 
+    fetchUsers();
+  }, []);
   return (
     <>
       <div className="font-bold mt-6 text-lg">Users</div>
@@ -59,7 +64,7 @@ const UserCard = ({ user }: UserCardProps) => {
       </div>
 
       <div className="border border-black rounded-lg">
-        <Link to="/send">
+        <Link to={"/send/" + user._id}>
           <button className="bg-black hover:bg-white hover:text-black transition-colors duration-100 font-bold text-sm md:text-lg lg:text-xl text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg">
             Send Money
           </button>

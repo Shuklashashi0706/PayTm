@@ -8,11 +8,11 @@ export const register = async (req: Request, res: Response) => {
   try {
     const { name, email, password, phoneNum } = req.body;
     if (!name || !email || !password || !phoneNum) {
-      res.status(400).send({ message: "All fields are required" });
+      return res.status(400).send({ message: "All fields are required" });
     }
     const foundUser = await userModal.findOne({ email: email });
     if (foundUser) {
-      return res.status(403).send({ message: "User already registered" });
+      return res.status(400).send({ message: "User already registered" });
     }
     let salt = 10;
     const hashedPassword = bcrypt.hashSync(password, salt);
@@ -30,7 +30,7 @@ export const register = async (req: Request, res: Response) => {
     await bankModal.create(balance);
     return res
       .status(200)
-      .cookie("token", jwtToken().generateToken(user))
+      .cookie("token", jwtToken().generateToken(user), { httpOnly: true })
       .send({ message: "User registered successfully" });
   } catch (error) {
     console.error(error);
@@ -49,14 +49,44 @@ export const login = async (req: Request, res: Response) => {
       name: user?.name,
       email: user?.email,
     };
+    const aggregate = [
+      {
+        $match: {
+          email:`${emails}`,
+        },
+      },
+      {
+        $lookup: {
+          from: "accounts",
+          localField: "_id",
+          foreignField: "userId",
+          as: "result",
+        },
+      },
+      {
+        $unwind: {
+          path: "$result",
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          email: 1,
+          phone: 1,
+          balance: "$result.balance",
+        },
+      },
+    ];
+    const userRes = await userModal.aggregate(aggregate); 
     if (user) {
       const password = user.password;
       const isSame = bcrypt.compareSync(passwords, password);
       if (isSame) {
         res
           .status(200)
-          .cookie("token", jwtToken().generateToken(users))
-          .send({ message: "User login successfully" });
+          .cookie("token", jwtToken().generateToken(users), { httpOnly: true })
+          .send({ message: "User login successfully", userRes });
       } else {
         res.status(400).send({ message: "User not login successfully" });
       }
